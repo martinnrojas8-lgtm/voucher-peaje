@@ -14,40 +14,101 @@
 
   .toolbar {
     display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-    margin-bottom: 16px; position: sticky; top: 0; background: #111; padding: 8px 0; z-index: 10;
+    margin-bottom: 16px; position: sticky; top: 0; background: #111; padding: 8px 0; z-index: 20;
   }
   .btn {
     background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 10px;
     padding: 10px 14px; font-size: 14px; cursor: pointer; display: inline-flex;
-    align-items: center; gap: 6px; transition: background .15s;
+    align-items: center; gap: 6px;
   }
   .btn:active { background: #3a3a3a; }
   .btn.primary { background: #1f6feb; border-color: #1f6feb; }
   .btn.danger  { background: #b3261e; border-color: #b3261e; }
-  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn.success { background: #1a7f37; border-color: #1a7f37; }
+  .btn:disabled { opacity: .4; }
 
-  /* HOJA (lo que se captura) */
   #sheet {
     background: #fff; color: #000; width: 100%; max-width: 800px;
-    margin: 0 auto; padding: 16px; border-radius: 6px;
-    display: flex; flex-direction: column; gap: 12px;
+    margin: 0 auto; padding: 8px; border-radius: 6px;
+    display: flex; flex-direction: column; gap: 8px;
+    min-height: 200px;
   }
   #sheet .empty { text-align: center; color: #999; padding: 40px 0; font-size: 14px; }
-  .item { width: 100%; display: flex; flex-direction: column; }
-  .item img { width: 100%; display: block; border-radius: 4px; }
-  .item.voucher img { border: 1px solid #eee; }
-  .peaje-label {
-    font-size: 12px; font-weight: 700; color: #444; margin-bottom: 4px;
-    border-bottom: 1px solid #eee; padding-bottom: 2px;
-  }
-  .sep { height: 1px; background: #eee; margin: 4px 0; }
 
-  /* Modo captura: oculta todo menos la hoja */
-  body.capture .toolbar, body.capture h1 { display: none; }
-  body.capture { background: #fff; padding: 0; }
-  body.capture #sheet { border-radius: 0; max-width: 100%; padding: 8px; }
+  .voucher-box {
+    width: 100%; display: flex; justify-content: center; align-items: center;
+    background: #f5f5f5; border: 1px dashed #ccc; border-radius: 4px; overflow: hidden;
+  }
+  .voucher-box img { width: 100%; height: auto; display: block; }
+
+  .peajes-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 4px; width: 100%;
+  }
+  .peaje-item {
+    display: flex; flex-direction: column;
+    border: 1px solid #ddd; border-radius: 3px; overflow: hidden;
+    background: #fff;
+  }
+  .peaje-num {
+    font-size: 9px; font-weight: 700; color: #fff; background: #444;
+    padding: 1px 4px; text-align: center; line-height: 1.2;
+  }
+  .peaje-item img { width: 100%; height: auto; display: block; }
+
+  /* Modo captura */
+  body.capture { background: #fff; padding: 4px; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+  body.capture .toolbar, body.capture h1, body.capture .hint { display: none; }
+  body.capture #sheet {
+    max-width: 100%; border-radius: 0; padding: 4px; gap: 4px;
+    flex: 1; min-height: 0; height: 100vh;
+  }
+  body.capture .voucher-box { flex: 1 1 60%; min-height: 0; }
+  body.capture .voucher-box img {
+    max-height: 100%; width: auto; max-width: 100%; object-fit: contain;
+  }
+  body.capture .peajes-grid { flex: 1 1 40%; min-height: 0; align-content: start; }
 
   .hint { text-align: center; font-size: 12px; color: #888; margin-top: 12px; }
+
+  /* Botón flotante para salir de modo captura */
+  #exitCapture {
+    display: none;
+    position: fixed; top: 10px; right: 10px; z-index: 999;
+    background: rgba(0,0,0,0.75); color: #fff; border: none;
+    padding: 10px 14px; border-radius: 50px; font-size: 14px;
+    font-weight: 600; cursor: pointer; backdrop-filter: blur(4px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  body.capture #exitCapture { display: block; }
+
+  /* Modal de recorte */
+  #cropModal {
+    position: fixed; inset: 0; background: #000; z-index: 100;
+    display: none; flex-direction: column;
+  }
+  #cropModal.open { display: flex; }
+  #cropHeader {
+    padding: 10px; background: #222; color: #fff; text-align: center;
+    font-size: 14px; display: flex; justify-content: space-between; align-items: center;
+  }
+  #cropArea { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  #cropCanvas { max-width: 100%; max-height: 100%; touch-action: none; user-select: none; }
+  #cropFooter {
+    padding: 10px; background: #222; display: flex; gap: 8px; justify-content: center;
+  }
+  .crop-btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 14px; cursor: pointer; }
+  .crop-btn.cancel { background: #444; color: #fff; }
+  .crop-btn.ok { background: #1f6feb; color: #fff; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.85); color: #fff; padding: 10px 18px;
+    border-radius: 20px; font-size: 14px; z-index: 9999;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  #toast.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -64,6 +125,9 @@
     <input type="file" id="peajesInput" accept="image/*" multiple hidden>
   </label>
   <button class="btn" id="captureBtn">🖼️ Modo captura</button>
+  <button class="btn success" id="saveImgBtn" disabled>💾 Guardar imagen</button>
+  <button class="btn" id="saveDraftBtn" disabled>📥 Guardar borrador</button>
+  <button class="btn" id="loadDraftBtn" style="display:none;">📂 Restaurar borrador</button>
   <button class="btn" id="shareBtn" disabled>📤 Compartir</button>
   <button class="btn danger" id="clearBtn">🗑️ Limpiar</button>
 </div>
@@ -74,19 +138,177 @@
 
 <div class="hint">Todo se procesa en tu celular. Nada se sube a internet. 🔒</div>
 
+<button id="exitCapture">✖️ Volver</button>
+
+<div id="cropModal">
+  <div id="cropHeader">
+    <span>✂️ Ajustá el recorte del voucher</span>
+    <span id="cropInfo" style="font-size:11px;color:#aaa;"></span>
+  </div>
+  <div id="cropArea">
+    <canvas id="cropCanvas"></canvas>
+  </div>
+  <div id="cropFooter">
+    <button class="crop-btn cancel" id="cropCancel">Cancelar</button>
+    <button class="crop-btn ok" id="cropOk">✅ Usar esta foto</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
 <script>
-// ---------- Utilidades ----------
+// ---------- Estado ----------
 const sheet = document.getElementById('sheet');
 const voucherInput = document.getElementById('voucherInput');
 const peajesInput = document.getElementById('peajesInput');
 const clearBtn = document.getElementById('clearBtn');
 const captureBtn = document.getElementById('captureBtn');
 const shareBtn = document.getElementById('shareBtn');
+const saveImgBtn = document.getElementById('saveImgBtn');
+const saveDraftBtn = document.getElementById('saveDraftBtn');
+const loadDraftBtn = document.getElementById('loadDraftBtn');
+const exitCapture = document.getElementById('exitCapture');
+const toast = document.getElementById('toast');
 
-let voucherData = null;   // dataURL del voucher
-let peajesData = [];      // array de dataURLs
+let voucherData = null;
+let peajesData = [];
 
-// ---------- Auto-recorte de bordes blancos ----------
+// ---------- Toast ----------
+function showToast(msg, ms = 2000) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), ms);
+}
+
+// ---------- Recorte manual ----------
+const cropModal = document.getElementById('cropModal');
+const cropCanvas = document.getElementById('cropCanvas');
+let cropImg = null;
+let cropRect = { x: 0, y: 0, w: 0, h: 0 };
+let cropScale = 1;
+
+function openCrop(dataURL) {
+  const img = new Image();
+  img.onload = () => {
+    cropImg = img;
+    cropModal.classList.add('open');
+    const area = document.getElementById('cropArea');
+    const maxW = area.clientWidth - 20;
+    const maxH = area.clientHeight - 20;
+    const scale = Math.min(maxW / img.width, maxH / img.height);
+    cropCanvas.width = img.width * scale;
+    cropCanvas.height = img.height * scale;
+    cropScale = scale;
+    cropRect = {
+      x: cropCanvas.width * 0.1,
+      y: cropCanvas.height * 0.1,
+      w: cropCanvas.width * 0.8,
+      h: cropCanvas.height * 0.8
+    };
+    drawCrop();
+  };
+  img.src = dataURL;
+}
+
+function drawCrop() {
+  const ctx = cropCanvas.getContext('2d');
+  ctx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+  ctx.drawImage(cropImg, 0, 0, cropCanvas.width, cropCanvas.height);
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(0, 0, cropCanvas.width, cropRect.y);
+  ctx.fillRect(0, cropRect.y + cropRect.h, cropCanvas.width, cropCanvas.height);
+  ctx.fillRect(0, cropRect.y, cropRect.x, cropRect.h);
+  ctx.fillRect(cropRect.x + cropRect.w, cropRect.y, cropCanvas.width - cropRect.x - cropRect.w, cropRect.h);
+  ctx.strokeStyle = '#1f6feb';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+  const s = 14;
+  ctx.fillStyle = '#1f6feb';
+  [[cropRect.x, cropRect.y], [cropRect.x + cropRect.w, cropRect.y],
+   [cropRect.x, cropRect.y + cropRect.h], [cropRect.x + cropRect.w, cropRect.y + cropRect.h]]
+   .forEach(([x, y]) => ctx.fillRect(x - s/2, y - s/2, s, s));
+}
+
+let dragging = null;
+function getTouch(e) {
+  const t = e.touches ? e.touches[0] : e;
+  const r = cropCanvas.getBoundingClientRect();
+  return {
+    x: (t.clientX - r.left) * (cropCanvas.width / r.width),
+    y: (t.clientY - r.top) * (cropCanvas.height / r.height)
+  };
+}
+function hitCorner(p) {
+  const s = 20;
+  const corners = [
+    { n: 'tl', x: cropRect.x, y: cropRect.y },
+    { n: 'tr', x: cropRect.x + cropRect.w, y: cropRect.y },
+    { n: 'bl', x: cropRect.x, y: cropRect.y + cropRect.h },
+    { n: 'br', x: cropRect.x + cropRect.w, y: cropRect.y + cropRect.h }
+  ];
+  for (const c of corners) {
+    if (Math.abs(p.x - c.x) < s && Math.abs(p.y - c.y) < s) return c.n;
+  }
+  if (p.x > cropRect.x && p.x < cropRect.x + cropRect.w &&
+      p.y > cropRect.y && p.y < cropRect.y + cropRect.h) return 'move';
+  return null;
+}
+function onStart(e) {
+  e.preventDefault();
+  const p = getTouch(e);
+  const hit = hitCorner(p);
+  if (hit) dragging = { type: hit, startX: p.x, startY: p.y, orig: { ...cropRect } };
+}
+function onMove(e) {
+  if (!dragging) return;
+  e.preventDefault();
+  const p = getTouch(e);
+  const dx = p.x - dragging.startX;
+  const dy = p.y - dragging.startY;
+  const o = dragging.orig;
+  const min = 30;
+  if (dragging.type === 'move') {
+    cropRect.x = Math.max(0, Math.min(cropCanvas.width - o.w, o.x + dx));
+    cropRect.y = Math.max(0, Math.min(cropCanvas.height - o.h, o.y + dy));
+  } else {
+    let x1 = o.x, y1 = o.y, x2 = o.x + o.w, y2 = o.y + o.h;
+    if (dragging.type.includes('l')) x1 = Math.max(0, Math.min(x2 - min, o.x + dx));
+    if (dragging.type.includes('r')) x2 = Math.min(cropCanvas.width, Math.max(x1 + min, o.x + o.w + dx));
+    if (dragging.type.includes('t')) y1 = Math.max(0, Math.min(y2 - min, o.y + dy));
+    if (dragging.type.includes('b')) y2 = Math.min(cropCanvas.height, Math.max(y1 + min, o.y + o.h + dy));
+    cropRect.x = x1; cropRect.y = y1; cropRect.w = x2 - x1; cropRect.h = y2 - y1;
+  }
+  drawCrop();
+}
+function onEnd() { dragging = null; }
+cropCanvas.addEventListener('mousedown', onStart);
+cropCanvas.addEventListener('mousemove', onMove);
+cropCanvas.addEventListener('mouseup', onEnd);
+cropCanvas.addEventListener('mouseleave', onEnd);
+cropCanvas.addEventListener('touchstart', onStart, { passive: false });
+cropCanvas.addEventListener('touchmove', onMove, { passive: false });
+cropCanvas.addEventListener('touchend', onEnd);
+
+document.getElementById('cropCancel').addEventListener('click', () => {
+  cropModal.classList.remove('open');
+  voucherInput.value = '';
+});
+document.getElementById('cropOk').addEventListener('click', () => {
+  const sx = cropRect.x / cropScale;
+  const sy = cropRect.y / cropScale;
+  const sw = cropRect.w / cropScale;
+  const sh = cropRect.h / cropScale;
+  const out = document.createElement('canvas');
+  out.width = sw; out.height = sh;
+  out.getContext('2d').drawImage(cropImg, sx, sy, sw, sh, 0, 0, sw, sh);
+  voucherData = out.toDataURL('image/jpeg', 0.92);
+  cropModal.classList.remove('open');
+  voucherInput.value = '';
+  render();
+});
+
+// ---------- Auto-recorte de peajes ----------
 function autocrop(dataURL) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -96,39 +318,28 @@ function autocrop(dataURL) {
       const ctx = c.getContext('2d');
       ctx.drawImage(img, 0, 0);
       const data = ctx.getImageData(0, 0, c.width, c.height).data;
-
-      // Umbral: pixel "blanco" si R,G,B > 240
-      const thr = 240;
+      const thr = 235;
       let top = 0, bottom = c.height - 1, left = 0, right = c.width - 1;
       const isWhite = (x, y) => {
         const i = (y * c.width + x) * 4;
         return data[i] > thr && data[i+1] > thr && data[i+2] > thr;
       };
-
-      // top
       outer: for (; top < c.height; top++)
         for (let x = 0; x < c.width; x++) if (!isWhite(x, top)) break outer;
-      // bottom
       outer: for (; bottom > top; bottom--)
         for (let x = 0; x < c.width; x++) if (!isWhite(x, bottom)) break outer;
-      // left
       outer: for (; left < c.width; left++)
         for (let y = top; y <= bottom; y++) if (!isWhite(left, y)) break outer;
-      // right
       outer: for (; right > left; right--)
         for (let y = top; y <= bottom; y++) if (!isWhite(right, y)) break outer;
-
-      // Margen de seguridad
-      const pad = 4;
+      const pad = 2;
       top = Math.max(0, top - pad);
       bottom = Math.min(c.height - 1, bottom + pad);
       left = Math.max(0, left - pad);
       right = Math.min(c.width - 1, right + pad);
-
       const w = right - left + 1;
       const h = bottom - top + 1;
       if (w <= 0 || h <= 0) return resolve(dataURL);
-
       const out = document.createElement('canvas');
       out.width = w; out.height = h;
       out.getContext('2d').drawImage(img, left, top, w, h, 0, 0, w, h);
@@ -139,7 +350,6 @@ function autocrop(dataURL) {
   });
 }
 
-// ---------- Lectura de archivos ----------
 function fileToDataURL(file) {
   return new Promise((res, rej) => {
     const r = new FileReader();
@@ -154,33 +364,37 @@ function render() {
   sheet.innerHTML = '';
   if (!voucherData && peajesData.length === 0) {
     sheet.innerHTML = '<div class="empty">Subí el voucher y los peajes para verlos acá 👆</div>';
-    shareBtn.disabled = true;
+    shareBtn.disabled = true; saveImgBtn.disabled = true; saveDraftBtn.disabled = true;
     return;
   }
-
   if (voucherData) {
-    const div = document.createElement('div');
-    div.className = 'item voucher';
+    const box = document.createElement('div');
+    box.className = 'voucher-box';
     const img = document.createElement('img');
     img.src = voucherData;
-    div.appendChild(img);
-    sheet.appendChild(div);
+    box.appendChild(img);
+    sheet.appendChild(box);
   }
-
-  peajesData.forEach((url, i) => {
-    const div = document.createElement('div');
-    div.className = 'item peaje';
-    const label = document.createElement('div');
-    label.className = 'peaje-label';
-    label.textContent = `Peaje ${i + 1}`;
-    const img = document.createElement('img');
-    img.src = url;
-    div.appendChild(label);
-    div.appendChild(img);
-    sheet.appendChild(div);
-  });
-
+  if (peajesData.length > 0) {
+    const grid = document.createElement('div');
+    grid.className = 'peajes-grid';
+    peajesData.forEach((url, i) => {
+      const item = document.createElement('div');
+      item.className = 'peaje-item';
+      const num = document.createElement('div');
+      num.className = 'peaje-num';
+      num.textContent = `Peaje ${i + 1}`;
+      const img = document.createElement('img');
+      img.src = url;
+      item.appendChild(num);
+      item.appendChild(img);
+      grid.appendChild(item);
+    });
+    sheet.appendChild(grid);
+  }
   shareBtn.disabled = false;
+  saveImgBtn.disabled = false;
+  saveDraftBtn.disabled = false;
 }
 
 // ---------- Eventos ----------
@@ -188,9 +402,7 @@ voucherInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const raw = await fileToDataURL(file);
-  voucherData = await autocrop(raw);
-  render();
-  voucherInput.value = '';
+  openCrop(raw);
 });
 
 peajesInput.addEventListener('change', async (e) => {
@@ -211,27 +423,90 @@ clearBtn.addEventListener('click', () => {
 });
 
 captureBtn.addEventListener('click', () => {
-  document.body.classList.toggle('capture');
-  captureBtn.textContent = document.body.classList.contains('capture')
-    ? '✖️ Salir captura'
-    : '🖼️ Modo captura';
+  document.body.classList.add('capture');
   window.scrollTo(0, 0);
 });
 
-// ---------- Compartir como imagen ----------
+exitCapture.addEventListener('click', () => {
+  document.body.classList.remove('capture');
+});
+
+// ---------- Guardar imagen (descarga) ----------
+saveImgBtn.addEventListener('click', async () => {
+  saveImgBtn.disabled = true;
+  saveImgBtn.textContent = '⏳ Generando...';
+  try {
+    const canvas = await buildCompositeCanvas();
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const fecha = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = `voucher-peajes-${fecha}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      showToast('💾 Imagen guardada en Descargas');
+    }, 'image/png');
+  } catch (err) {
+    showToast('❌ Error al generar');
+  }
+  saveImgBtn.disabled = false;
+  saveImgBtn.textContent = '💾 Guardar imagen';
+});
+
+// ---------- Guardar borrador (localStorage) ----------
+saveDraftBtn.addEventListener('click', () => {
+  try {
+    const draft = {
+      voucher: voucherData,
+      peajes: peajesData,
+      ts: Date.now()
+    };
+    localStorage.setItem('voucherPeajeDraft', JSON.stringify(draft));
+    showToast('📥 Borrador guardado');
+  } catch (e) {
+    showToast('❌ No se pudo guardar (lleno)');
+  }
+});
+
+function checkDraft() {
+  try {
+    const raw = localStorage.getItem('voucherPeajeDraft');
+    if (!raw) return;
+    const draft = JSON.parse(raw);
+    loadDraftBtn.style.display = 'inline-flex';
+    const fecha = new Date(draft.ts).toLocaleString('es-AR');
+    loadDraftBtn.textContent = `📂 Restaurar (${fecha})`;
+  } catch (e) {}
+}
+
+loadDraftBtn.addEventListener('click', () => {
+  try {
+    const raw = localStorage.getItem('voucherPeajeDraft');
+    if (!raw) return;
+    const draft = JSON.parse(raw);
+    voucherData = draft.voucher;
+    peajesData = draft.peajes || [];
+    render();
+    showToast('📂 Borrador restaurado');
+  } catch (e) {
+    showToast('❌ No se pudo restaurar');
+  }
+});
+
+// ---------- Compartir ----------
 shareBtn.addEventListener('click', async () => {
   shareBtn.disabled = true;
   shareBtn.textContent = '⏳ Generando...';
   try {
-    const canvas = await htmlToCanvas();
+    const canvas = await buildCompositeCanvas();
     canvas.toBlob(async (blob) => {
       const file = new File([blob], 'voucher-peajes.png', { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: 'Voucher + Peajes' });
-        } catch (err) { /* usuario canceló */ }
+        try { await navigator.share({ files: [file], title: 'Voucher + Peajes' }); } catch (err) {}
       } else {
-        // Fallback: descarga
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = 'voucher-peajes.png';
@@ -241,33 +516,55 @@ shareBtn.addEventListener('click', async () => {
       shareBtn.textContent = '📤 Compartir';
     }, 'image/png');
   } catch (err) {
-    alert('No se pudo generar la imagen. Probá con el Modo captura + captura de pantalla.');
+    alert('No se pudo generar.');
     shareBtn.disabled = false;
     shareBtn.textContent = '📤 Compartir';
   }
 });
 
-// ---------- htmlToCanvas casero (sin librerías) ----------
-async function htmlToCanvas() {
-  const items = Array.from(sheet.querySelectorAll('.item'));
-  if (items.length === 0) throw new Error('Nada para exportar');
+// ---------- Genera canvas con TODO junto ----------
+async function buildCompositeCanvas() {
+  const voucherImg = sheet.querySelector('.voucher-box img');
+  const peajeImgs = Array.from(sheet.querySelectorAll('.peaje-item img'));
+  if (!voucherImg && peajeImgs.length === 0) throw new Error('Nada');
 
-  // Ancho fijo de salida
-  const W = 800;
-  const gap = 12;
+  const W = 900;
+  const gap = 8;
+  const cols = 3;
+  const pad = 10;
 
-  // Cargar todas las imágenes y calcular alturas proporcionales
-  const imgs = await Promise.all(items.map(async (it) => {
-    const img = it.querySelector('img');
+  let vEl = null, voucherH = 0;
+  if (voucherImg) {
+    vEl = new Image();
+    vEl.src = voucherImg.src;
+    await vEl.decode();
+    voucherH = Math.round((vEl.naturalHeight / vEl.naturalWidth) * (W - pad*2));
+  }
+
+  const cellW = Math.floor((W - pad*2 - gap*(cols-1)) / cols);
+  const loaded = await Promise.all(peajeImgs.map(async (im) => {
     const el = new Image();
-    el.src = img.src;
+    el.src = im.src;
     await el.decode();
-    const labelH = it.querySelector('.peaje-label') ? 22 : 0;
-    const h = Math.round((el.naturalHeight / el.naturalWidth) * W);
-    return { el, h, labelH };
+    return el;
   }));
 
-  const totalH = imgs.reduce((acc, o) => acc + o.h + o.labelH + gap, 0) + gap;
+  // Calcular filas
+  const rows = [];
+  for (let i = 0; i < loaded.length; i += cols) {
+    const rowImgs = loaded.slice(i, i + cols);
+    let maxH = 0;
+    rowImgs.forEach(el => {
+      const h = Math.round((el.naturalHeight / el.naturalWidth) * cellW);
+      maxH = Math.max(maxH, h);
+    });
+    rows.push({ imgs: rowImgs, h: maxH });
+  }
+  const gridTotalH = rows.reduce((a, r) => a + r.h, 0) + gap * Math.max(0, rows.length - 1);
+  const labelH = loaded.length > 0 ? 20 : 0;
+
+  const totalH = pad + voucherH + (voucherH && loaded.length ? gap : 0) +
+                 labelH + gridTotalH + pad;
 
   const canvas = document.createElement('canvas');
   canvas.width = W;
@@ -276,21 +573,32 @@ async function htmlToCanvas() {
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, W, totalH);
 
-  let y = gap;
-  for (const o of imgs) {
-    if (o.labelH) {
-      ctx.fillStyle = '#444';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.fillText('Peaje', 4, y + 14);
-      y += o.labelH;
+  let y = pad;
+  if (vEl) {
+    ctx.drawImage(vEl, pad, y, W - pad*2, voucherH);
+    y += voucherH + gap;
+  }
+  if (loaded.length > 0) {
+    ctx.fillStyle = '#666';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('Peajes', pad, y + 14);
+    y += labelH;
+
+    for (const row of rows) {
+      row.imgs.forEach((el, col) => {
+        const h = Math.round((el.naturalHeight / el.naturalWidth) * cellW);
+        const x = pad + col * (cellW + gap);
+        ctx.drawImage(el, x, y, cellW, h);
+      });
+      y += row.h + gap;
     }
-    ctx.drawImage(o.el, 0, y, W, o.h);
-    y += o.h + gap;
   }
   return canvas;
 }
 
+// ---------- Init ----------
 render();
+checkDraft();
 </script>
 </body>
 </html>
