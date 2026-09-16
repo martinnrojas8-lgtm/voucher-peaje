@@ -56,31 +56,54 @@
   }
   .peaje-item img { width: 100%; height: auto; display: block; }
 
-  /* Modo captura */
-  body.capture { background: #fff; padding: 4px; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+  /* ---- MODO CAPTURA ---- */
+  body.capture {
+    background: #fff; padding: 2px; overflow: hidden;
+    height: 100vh; height: 100dvh; display: flex; flex-direction: column;
+  }
   body.capture .toolbar, body.capture h1, body.capture .hint { display: none; }
   body.capture #sheet {
     max-width: 100%; border-radius: 0; padding: 4px; gap: 4px;
-    flex: 1; min-height: 0; height: 100vh;
+    flex: 1; min-height: 0; height: 100%;
+    display: flex; flex-direction: column;
   }
-  body.capture .voucher-box { flex: 1 1 60%; min-height: 0; }
+  /* Voucher: tamaño variable según --voucher-flex */
+  body.capture .voucher-box {
+    flex: var(--voucher-flex, 0 1 45%);
+    min-height: 0;
+    overflow: hidden;
+  }
   body.capture .voucher-box img {
     max-height: 100%; width: auto; max-width: 100%; object-fit: contain;
   }
-  body.capture .peajes-grid { flex: 1 1 40%; min-height: 0; align-content: start; }
+  body.capture .peajes-grid {
+    flex: 1 1 auto; min-height: 0;
+    align-content: start;
+    overflow: hidden;
+  }
 
   .hint { text-align: center; font-size: 12px; color: #888; margin-top: 12px; }
 
-  /* Botón flotante para salir de modo captura */
-  #exitCapture {
+  /* Controles flotantes en modo captura */
+  #exitCapture, #sizeControls {
     display: none;
-    position: fixed; top: 10px; right: 10px; z-index: 999;
-    background: rgba(0,0,0,0.75); color: #fff; border: none;
-    padding: 10px 14px; border-radius: 50px; font-size: 14px;
-    font-weight: 600; cursor: pointer; backdrop-filter: blur(4px);
+    position: fixed; top: 10px; z-index: 999;
+    background: rgba(0,0,0,0.75); color: #fff;
+    border: none; border-radius: 50px; font-size: 14px; font-weight: 600;
+    cursor: pointer; backdrop-filter: blur(4px);
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
   }
+  #exitCapture { right: 10px; padding: 10px 14px; }
+  #sizeControls {
+    left: 10px; padding: 4px;
+    display: none; align-items: center; gap: 2px;
+  }
   body.capture #exitCapture { display: block; }
+  body.capture #sizeControls { display: flex; }
+  #sizeControls button {
+    background: transparent; color: #fff; border: none;
+    padding: 6px 10px; font-size: 16px; font-weight: 700; cursor: pointer;
+  }
 
   /* Modal de recorte */
   #cropModal {
@@ -138,7 +161,12 @@
 
 <div class="hint">Todo se procesa en tu celular. Nada se sube a internet. 🔒</div>
 
+<!-- Controles modo captura -->
 <button id="exitCapture">✖️ Volver</button>
+<div id="sizeControls">
+  <button id="sizeMinus" title="Achicar voucher">➖</button>
+  <button id="sizePlus" title="Agrandar voucher">➕</button>
+</div>
 
 <div id="cropModal">
   <div id="cropHeader">
@@ -168,10 +196,28 @@ const saveImgBtn = document.getElementById('saveImgBtn');
 const saveDraftBtn = document.getElementById('saveDraftBtn');
 const loadDraftBtn = document.getElementById('loadDraftBtn');
 const exitCapture = document.getElementById('exitCapture');
+const sizeMinus = document.getElementById('sizeMinus');
+const sizePlus = document.getElementById('sizePlus');
 const toast = document.getElementById('toast');
 
 let voucherData = null;
 let peajesData = [];
+
+// Porcentaje del voucher en modo captura (arranca en 45%)
+let voucherPct = 45;
+
+function applyVoucherSize() {
+  document.documentElement.style.setProperty('--voucher-flex', `0 0 ${voucherPct}%`);
+}
+
+sizeMinus.addEventListener('click', () => {
+  voucherPct = Math.max(10, voucherPct - 5);
+  applyVoucherSize();
+});
+sizePlus.addEventListener('click', () => {
+  voucherPct = Math.min(90, voucherPct + 5);
+  applyVoucherSize();
+});
 
 // ---------- Toast ----------
 function showToast(msg, ms = 2000) {
@@ -423,6 +469,7 @@ clearBtn.addEventListener('click', () => {
 });
 
 captureBtn.addEventListener('click', () => {
+  applyVoucherSize();
   document.body.classList.add('capture');
   window.scrollTo(0, 0);
 });
@@ -431,7 +478,7 @@ exitCapture.addEventListener('click', () => {
   document.body.classList.remove('capture');
 });
 
-// ---------- Guardar imagen (descarga) ----------
+// ---------- Guardar imagen ----------
 saveImgBtn.addEventListener('click', async () => {
   saveImgBtn.disabled = true;
   saveImgBtn.textContent = '⏳ Generando...';
@@ -456,14 +503,10 @@ saveImgBtn.addEventListener('click', async () => {
   saveImgBtn.textContent = '💾 Guardar imagen';
 });
 
-// ---------- Guardar borrador (localStorage) ----------
+// ---------- Guardar borrador ----------
 saveDraftBtn.addEventListener('click', () => {
   try {
-    const draft = {
-      voucher: voucherData,
-      peajes: peajesData,
-      ts: Date.now()
-    };
+    const draft = { voucher: voucherData, peajes: peajesData, ts: Date.now() };
     localStorage.setItem('voucherPeajeDraft', JSON.stringify(draft));
     showToast('📥 Borrador guardado');
   } catch (e) {
@@ -522,7 +565,7 @@ shareBtn.addEventListener('click', async () => {
   }
 });
 
-// ---------- Genera canvas con TODO junto ----------
+// ---------- Canvas con todo junto ----------
 async function buildCompositeCanvas() {
   const voucherImg = sheet.querySelector('.voucher-box img');
   const peajeImgs = Array.from(sheet.querySelectorAll('.peaje-item img'));
@@ -549,7 +592,6 @@ async function buildCompositeCanvas() {
     return el;
   }));
 
-  // Calcular filas
   const rows = [];
   for (let i = 0; i < loaded.length; i += cols) {
     const rowImgs = loaded.slice(i, i + cols);
@@ -563,8 +605,7 @@ async function buildCompositeCanvas() {
   const gridTotalH = rows.reduce((a, r) => a + r.h, 0) + gap * Math.max(0, rows.length - 1);
   const labelH = loaded.length > 0 ? 20 : 0;
 
-  const totalH = pad + voucherH + (voucherH && loaded.length ? gap : 0) +
-                 labelH + gridTotalH + pad;
+  const totalH = pad + voucherH + (voucherH && loaded.length ? gap : 0) + labelH + gridTotalH + pad;
 
   const canvas = document.createElement('canvas');
   canvas.width = W;
@@ -583,7 +624,6 @@ async function buildCompositeCanvas() {
     ctx.font = 'bold 12px sans-serif';
     ctx.fillText('Peajes', pad, y + 14);
     y += labelH;
-
     for (const row of rows) {
       row.imgs.forEach((el, col) => {
         const h = Math.round((el.naturalHeight / el.naturalWidth) * cellW);
