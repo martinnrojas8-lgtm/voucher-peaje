@@ -42,17 +42,17 @@
   .voucher-box img { width: 100%; height: auto; display: block; }
 
   .peajes-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 4px; width: 100%;
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 6px; width: 100%;
   }
   .peaje-item {
     display: flex; flex-direction: column;
     border: 1px solid #ddd; border-radius: 3px; overflow: hidden;
-    background: #fff;
+    background: #fff; cursor: zoom-in;
   }
   .peaje-num {
-    font-size: 9px; font-weight: 700; color: #fff; background: #444;
-    padding: 1px 4px; text-align: center; line-height: 1.2;
+    font-size: 10px; font-weight: 700; color: #fff; background: #444;
+    padding: 2px 4px; text-align: center; line-height: 1.2;
   }
   .peaje-item img { width: 100%; height: auto; display: block; }
 
@@ -67,9 +67,8 @@
     flex: 1; min-height: 0; height: 100%;
     display: flex; flex-direction: column;
   }
-  /* Voucher: tamaño variable según --voucher-flex */
   body.capture .voucher-box {
-    flex: var(--voucher-flex, 0 1 45%);
+    flex: var(--voucher-flex, 0 0 45%);
     min-height: 0;
     overflow: hidden;
   }
@@ -123,6 +122,33 @@
   .crop-btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 14px; cursor: pointer; }
   .crop-btn.cancel { background: #444; color: #fff; }
   .crop-btn.ok { background: #1f6feb; color: #fff; }
+
+  /* Zoom de peajes */
+  #peajeZoom {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+    z-index: 200; display: none; align-items: center; justify-content: center;
+    flex-direction: column; padding: 20px;
+  }
+  #peajeZoom.open { display: flex; }
+  #peajeZoom img {
+    max-width: 100%; max-height: 85vh; object-fit: contain;
+    border-radius: 8px; background: #fff;
+  }
+  #peajeZoom .close {
+    position: absolute; top: 15px; right: 15px;
+    background: #fff; color: #000; border: none; border-radius: 50%;
+    width: 40px; height: 40px; font-size: 20px; font-weight: 700;
+    cursor: pointer;
+  }
+  #peajeZoom .nav {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 12px;
+  }
+  #peajeZoom .nav button {
+    background: rgba(255,255,255,0.9); color: #000; border: none;
+    border-radius: 50%; width: 50px; height: 50px; font-size: 20px;
+    cursor: pointer; font-weight: 700;
+  }
 
   /* Toast */
   #toast {
@@ -182,6 +208,16 @@
   </div>
 </div>
 
+<!-- Zoom de peajes -->
+<div id="peajeZoom">
+  <button class="close" id="zoomClose">✕</button>
+  <img id="zoomImg" src="">
+  <div class="nav">
+    <button id="zoomPrev">‹</button>
+    <button id="zoomNext">›</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -203,13 +239,11 @@ const toast = document.getElementById('toast');
 let voucherData = null;
 let peajesData = [];
 
-// Porcentaje del voucher en modo captura (arranca en 45%)
 let voucherPct = 45;
 
 function applyVoucherSize() {
   document.documentElement.style.setProperty('--voucher-flex', `0 0 ${voucherPct}%`);
 }
-
 sizeMinus.addEventListener('click', () => {
   voucherPct = Math.max(10, voucherPct - 5);
   applyVoucherSize();
@@ -348,7 +382,7 @@ document.getElementById('cropOk').addEventListener('click', () => {
   const out = document.createElement('canvas');
   out.width = sw; out.height = sh;
   out.getContext('2d').drawImage(cropImg, sx, sy, sw, sh, 0, 0, sw, sh);
-  voucherData = out.toDataURL('image/jpeg', 0.92);
+  voucherData = out.toDataURL('image/png');
   cropModal.classList.remove('open');
   voucherInput.value = '';
   render();
@@ -389,7 +423,7 @@ function autocrop(dataURL) {
       const out = document.createElement('canvas');
       out.width = w; out.height = h;
       out.getContext('2d').drawImage(img, left, top, w, h, 0, 0, w, h);
-      resolve(out.toDataURL('image/jpeg', 0.92));
+      resolve(out.toDataURL('image/png'));
     };
     img.onerror = () => resolve(dataURL);
     img.src = dataURL;
@@ -434,6 +468,7 @@ function render() {
       img.src = url;
       item.appendChild(num);
       item.appendChild(img);
+      item.addEventListener('click', () => openZoom(i));
       grid.appendChild(item);
     });
     sheet.appendChild(grid);
@@ -442,6 +477,26 @@ function render() {
   saveImgBtn.disabled = false;
   saveDraftBtn.disabled = false;
 }
+
+// ---------- Zoom de peajes ----------
+const peajeZoom = document.getElementById('peajeZoom');
+const zoomImg = document.getElementById('zoomImg');
+let zoomIdx = 0;
+
+function openZoom(i) {
+  if (i < 0 || i >= peajesData.length) return;
+  zoomIdx = i;
+  zoomImg.src = peajesData[i];
+  peajeZoom.classList.add('open');
+}
+document.getElementById('zoomClose').addEventListener('click', () => {
+  peajeZoom.classList.remove('open');
+});
+document.getElementById('zoomPrev').addEventListener('click', () => openZoom(zoomIdx - 1));
+document.getElementById('zoomNext').addEventListener('click', () => openZoom(zoomIdx + 1));
+peajeZoom.addEventListener('click', (e) => {
+  if (e.target === peajeZoom) peajeZoom.classList.remove('open');
+});
 
 // ---------- Eventos ----------
 voucherInput.addEventListener('change', async (e) => {
@@ -571,10 +626,10 @@ async function buildCompositeCanvas() {
   const peajeImgs = Array.from(sheet.querySelectorAll('.peaje-item img'));
   if (!voucherImg && peajeImgs.length === 0) throw new Error('Nada');
 
-  const W = 900;
-  const gap = 8;
-  const cols = 3;
-  const pad = 10;
+  const W = 2000;
+  const gap = 12;
+  const cols = 2;
+  const pad = 20;
 
   let vEl = null, voucherH = 0;
   if (voucherImg) {
@@ -603,7 +658,7 @@ async function buildCompositeCanvas() {
     rows.push({ imgs: rowImgs, h: maxH });
   }
   const gridTotalH = rows.reduce((a, r) => a + r.h, 0) + gap * Math.max(0, rows.length - 1);
-  const labelH = loaded.length > 0 ? 20 : 0;
+  const labelH = loaded.length > 0 ? 30 : 0;
 
   const totalH = pad + voucherH + (voucherH && loaded.length ? gap : 0) + labelH + gridTotalH + pad;
 
@@ -621,8 +676,8 @@ async function buildCompositeCanvas() {
   }
   if (loaded.length > 0) {
     ctx.fillStyle = '#666';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.fillText('Peajes', pad, y + 14);
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('Peajes', pad, y + 22);
     y += labelH;
     for (const row of rows) {
       row.imgs.forEach((el, col) => {
