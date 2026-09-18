@@ -11,7 +11,6 @@
     background: #111; color: #eee; padding: 12px; padding-bottom: 40px;
   }
   h1 { font-size: 18px; margin: 0 0 12px; text-align: center; }
-
   .toolbar {
     display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
     margin-bottom: 16px; position: sticky; top: 0; background: #111; padding: 8px 0; z-index: 20;
@@ -26,21 +25,17 @@
   .btn.danger  { background: #b3261e; border-color: #b3261e; }
   .btn.success { background: #1a7f37; border-color: #1a7f37; }
   .btn:disabled { opacity: .4; }
-
   #sheet {
     background: #fff; color: #000; width: 100%; max-width: 800px;
     margin: 0 auto; padding: 8px; border-radius: 6px;
-    display: flex; flex-direction: column; gap: 8px;
-    min-height: 200px;
+    display: flex; flex-direction: column; gap: 8px; min-height: 200px;
   }
   #sheet .empty { text-align: center; color: #999; padding: 40px 0; font-size: 14px; }
-
   .voucher-box {
     width: 100%; display: flex; justify-content: center; align-items: center;
     background: #f5f5f5; border: 1px dashed #ccc; border-radius: 4px; overflow: hidden;
   }
   .voucher-box img { width: 100%; height: auto; display: block; }
-
   .peajes-grid {
     display: grid; grid-template-columns: repeat(2, 1fr);
     gap: 6px; width: 100%;
@@ -64,8 +59,6 @@
     border-radius: 50%; width: 28px; height: 28px; font-size: 14px;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
-
-  /* ---- MODO CAPTURA ---- */
   body.capture {
     background: #fff; padding: 2px; overflow: hidden;
     height: 100vh; height: 100dvh; display: flex; flex-direction: column;
@@ -78,21 +71,16 @@
   }
   body.capture .voucher-box {
     flex: var(--voucher-flex, 0 0 45%);
-    min-height: 0;
-    overflow: hidden;
+    min-height: 0; overflow: hidden;
   }
   body.capture .voucher-box img {
     max-height: 100%; width: auto; max-width: 100%; object-fit: contain;
   }
   body.capture .peajes-grid {
-    flex: 1 1 auto; min-height: 0;
-    align-content: start;
-    overflow: hidden;
+    flex: 1 1 auto; min-height: 0; align-content: start; overflow: hidden;
   }
   body.capture .peaje-actions { display: none; }
-
   .hint { text-align: center; font-size: 12px; color: #888; margin-top: 12px; }
-
   #exitCapture, #sizeControls {
     display: none;
     position: fixed; top: 10px; z-index: 999;
@@ -109,7 +97,6 @@
     background: transparent; color: #fff; border: none;
     padding: 6px 10px; font-size: 16px; font-weight: 700; cursor: pointer;
   }
-
   #cropModal {
     position: fixed; inset: 0; background: #000; z-index: 100;
     display: none; flex-direction: column;
@@ -127,7 +114,6 @@
   .crop-btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 14px; cursor: pointer; }
   .crop-btn.cancel { background: #444; color: #fff; }
   .crop-btn.ok { background: #1f6feb; color: #fff; }
-
   #peajeZoom {
     position: fixed; inset: 0; background: rgba(0,0,0,0.95);
     z-index: 200; display: none; align-items: center; justify-content: center;
@@ -141,8 +127,7 @@
   #peajeZoom .close {
     position: absolute; top: 15px; right: 15px;
     background: #fff; color: #000; border: none; border-radius: 50%;
-    width: 40px; height: 40px; font-size: 20px; font-weight: 700;
-    cursor: pointer;
+    width: 40px; height: 40px; font-size: 20px; font-weight: 700; cursor: pointer;
   }
   #peajeZoom .nav {
     position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -153,7 +138,6 @@
     border-radius: 50%; width: 50px; height: 50px; font-size: 20px;
     cursor: pointer; font-weight: 700;
   }
-
   #toast {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.85); color: #fff; padding: 10px 18px;
@@ -162,7 +146,6 @@
     text-align: center; max-width: 90vw;
   }
   #toast.show { opacity: 1; }
-
   #loading {
     position: fixed; inset: 0; background: rgba(0,0,0,0.85);
     z-index: 500; display: none; align-items: center; justify-content: center;
@@ -176,7 +159,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
-<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
@@ -217,9 +199,7 @@
     <span id="cropTitle">✂️ Ajustá el recorte del voucher</span>
     <span id="cropInfo" style="font-size:11px;color:#aaa;"></span>
   </div>
-  <div id="cropArea">
-    <canvas id="cropCanvas"></canvas>
-  </div>
+  <div id="cropArea"><canvas id="cropCanvas"></canvas></div>
   <div id="cropFooter">
     <button class="crop-btn cancel" id="cropCancel">Cancelar</button>
     <button class="crop-btn ok" id="cropOk">✅ Usar esta foto</button>
@@ -243,12 +223,10 @@
 <div id="toast"></div>
 
 <script>
-// Config PDF.js worker
 if (window.pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
-// ---------- Estado ----------
 const sheet = document.getElementById('sheet');
 const voucherInput = document.getElementById('voucherInput');
 const peajesInput = document.getElementById('peajesInput');
@@ -266,9 +244,12 @@ const loading = document.getElementById('loading');
 const loadingText = document.getElementById('loadingText');
 
 let voucherData = null;
-let peajes = []; // { original, recortada }
-
+let peajes = [];
 let voucherPct = 45;
+
+// CONFIGURACIÓN DE EXPORTACIÓN
+const EXPORT_WIDTH = 2400;      // ancho final de la imagen
+const EXPORT_QUALITY = 0.88;    // calidad JPG (0-1)
 
 function applyVoucherSize() {
   document.documentElement.style.setProperty('--voucher-flex', `0 0 ${voucherPct}%`);
@@ -276,27 +257,22 @@ function applyVoucherSize() {
 sizeMinus.addEventListener('click', () => { voucherPct = Math.max(10, voucherPct - 5); applyVoucherSize(); });
 sizePlus.addEventListener('click', () => { voucherPct = Math.min(90, voucherPct + 5); applyVoucherSize(); });
 
-function showToast(msg, ms = 2000) {
+function showToast(msg, ms = 2500) {
   toast.textContent = msg;
   toast.classList.add('show');
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => toast.classList.remove('show'), ms);
 }
-
 function showLoading(text) {
   loadingText.textContent = text || 'Procesando...';
   loading.classList.add('open');
 }
-function hideLoading() {
-  loading.classList.remove('open');
-}
+function hideLoading() { loading.classList.remove('open'); }
 
-// ---------- Render PDF a canvas (alta resolución) ----------
 async function pdfToDataURL(file, targetWidth = 2000) {
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const page = await pdf.getPage(1);
-  // Calcular escala para llegar al targetWidth
   const baseViewport = page.getViewport({ scale: 1 });
   const scale = targetWidth / baseViewport.width;
   const viewport = page.getViewport({ scale });
@@ -310,7 +286,6 @@ async function pdfToDataURL(file, targetWidth = 2000) {
   return canvas.toDataURL('image/png');
 }
 
-// ---------- Auto-recorte ----------
 function autocrop(dataURL) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -491,7 +466,6 @@ document.getElementById('cropOk').addEventListener('click', () => {
   render();
 });
 
-// ---------- Render ----------
 function render() {
   sheet.innerHTML = '';
   if (!voucherData && peajes.length === 0) {
@@ -547,7 +521,6 @@ function render() {
   saveDraftBtn.disabled = false;
 }
 
-// ---------- Zoom ----------
 const peajeZoom = document.getElementById('peajeZoom');
 const zoomImg = document.getElementById('zoomImg');
 let zoomIdx = 0;
@@ -562,7 +535,6 @@ document.getElementById('zoomPrev').addEventListener('click', () => openZoom(zoo
 document.getElementById('zoomNext').addEventListener('click', () => openZoom(zoomIdx + 1));
 peajeZoom.addEventListener('click', (e) => { if (e.target === peajeZoom) peajeZoom.classList.remove('open'); });
 
-// ---------- Carga de archivos ----------
 voucherInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -612,24 +584,25 @@ captureBtn.addEventListener('click', () => {
 });
 exitCapture.addEventListener('click', () => document.body.classList.remove('capture'));
 
-// ---------- Guardar imagen ----------
+// ---------- Guardar imagen (JPG calidad 0.88 a 2400px) ----------
 saveImgBtn.addEventListener('click', async () => {
   saveImgBtn.disabled = true;
   saveImgBtn.textContent = '⏳ Generando...';
   try {
     const canvas = await buildCompositeCanvas();
     canvas.toBlob((blob) => {
+      const pesoMB = (blob.size / 1024 / 1024).toFixed(2);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       const fecha = new Date().toISOString().slice(0,10);
       a.href = url;
-      a.download = `voucher-peajes-${fecha}.png`;
+      a.download = `voucher-peajes-${fecha}.jpg`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 3000);
-      showToast('💾 Imagen guardada en Descargas');
-    }, 'image/png');
+      showToast(`💾 Guardada (${pesoMB} MB)`);
+    }, 'image/jpeg', EXPORT_QUALITY);
   } catch (err) {
     showToast('❌ Error al generar');
   }
@@ -637,7 +610,6 @@ saveImgBtn.addEventListener('click', async () => {
   saveImgBtn.textContent = '💾 Guardar imagen';
 });
 
-// ---------- Guardar borrador ----------
 saveDraftBtn.addEventListener('click', () => {
   try {
     const draft = { voucher: voucherData, peajes, ts: Date.now() };
@@ -673,25 +645,24 @@ loadDraftBtn.addEventListener('click', () => {
   }
 });
 
-// ---------- Compartir ----------
 shareBtn.addEventListener('click', async () => {
   shareBtn.disabled = true;
   shareBtn.textContent = '⏳ Generando...';
   try {
     const canvas = await buildCompositeCanvas();
     canvas.toBlob(async (blob) => {
-      const file = new File([blob], 'voucher-peajes.png', { type: 'image/png' });
+      const file = new File([blob], 'voucher-peajes.jpg', { type: 'image/jpeg' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try { await navigator.share({ files: [file], title: 'Voucher + Peajes' }); } catch (err) {}
       } else {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'voucher-peajes.png';
+        a.download = 'voucher-peajes.jpg';
         a.click();
       }
       shareBtn.disabled = false;
       shareBtn.textContent = '📤 Compartir';
-    }, 'image/png');
+    }, 'image/jpeg', EXPORT_QUALITY);
   } catch (err) {
     alert('No se pudo generar.');
     shareBtn.disabled = false;
@@ -699,12 +670,11 @@ shareBtn.addEventListener('click', async () => {
   }
 });
 
-// ---------- Canvas con todo junto ----------
 async function buildCompositeCanvas() {
   const voucherImg = sheet.querySelector('.voucher-box img');
   if (!voucherImg && peajes.length === 0) throw new Error('Nada');
 
-  const W = 3000; // ancho final (más grande = más nítido)
+  const W = EXPORT_WIDTH;
   const gap = 12;
   const cols = 2;
   const pad = 20;
@@ -769,7 +739,6 @@ async function buildCompositeCanvas() {
   return canvas;
 }
 
-// ---------- Init ----------
 render();
 checkDraft();
 </script>
